@@ -3,10 +3,13 @@ using WebApiRRHH.Context;
 
 var builder = WebApplication.CreateBuilder(args);
 
+//Agregar la configuracion de UserSecrets para manejar la cadena de conexion a la base de datos de forma segura
+builder.Configuration.AddUserSecrets<Program>();
+
 // Add services to the container.
 
 // Crear variiable para la cadena de conexion a la base de datos
-var connectionString = builder.Configuration.GetConnectionString("ConnectionSQLServer");
+var connectionString = builder.Configuration.GetConnectionString("SqlServer");
 
 //Registrar nuestro servicio para la conexion a la base de datos
 

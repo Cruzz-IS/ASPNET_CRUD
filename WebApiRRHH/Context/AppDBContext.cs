@@ -9,9 +9,5 @@ namespace WebApiRRHH.Context
         }
 
         public DbSet<Models.User> Users { get; set; }
-
-        protected AppDBContext()
-        {
-        }
     }
 }
