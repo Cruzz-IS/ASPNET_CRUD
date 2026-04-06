@@ -4,10 +4,8 @@ namespace WebApiRRHH.Context
 {
     public class AppDBContext : DbContext
     {
-        public AppDBContext(DbContextOptions options) : base(options)
-        {
-        }
-
         public DbSet<Models.User> Users { get; set; }
+
+        public AppDBContext(DbContextOptions<AppDBContext> options) : base(options) { }
     }
 }
