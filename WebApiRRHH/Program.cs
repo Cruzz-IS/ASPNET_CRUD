@@ -17,6 +17,12 @@ builder.Services.AddDbContext<AppDBContext>(
     options => options.UseSqlServer(connectionString)
 );
 
+// Repositorios
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+
+// Servicios
+builder.Services.AddScoped<IUserService, UserService>();
+
 
 builder.Services.AddCors(options =>
 {
