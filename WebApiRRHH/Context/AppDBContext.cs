@@ -54,10 +54,10 @@ namespace WebApiRRHH.Context
                     .HasDefaultValue("Employee");
 
                 // Relación con RefreshTokens
-                entity.HasMany(u => u.RefreshTokens)
-                    .WithOne(rt => rt.User)
-                    .HasForeignKey(rt => rt.UserId)
-                    .OnDelete(DeleteBehavior.Cascade);
+                //entity.HasMany(u => u.RefreshTokens)
+                //    .WithOne(rt => rt.User)
+                //    .HasForeignKey(rt => rt.UserId)
+                //    .OnDelete(DeleteBehavior.Cascade);
             });
 
             // Configuración de RefreshToken

@@ -2,7 +2,7 @@
 
 namespace WebApiRRHH.DTOs
 {
-    public class UserDtos
+    public class CreateUserDto
     {
         [Required(ErrorMessage = "El nombre es requerido")]
         [StringLength(80, MinimumLength = 2)]

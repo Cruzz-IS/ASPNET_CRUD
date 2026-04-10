@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using WebApiRRHH.Context;
 using WebApiRRHH.Models;
+using WebApiRRHH.Repositories.Interfaces;
 
 namespace WebApiRRHH.Repositories
 {

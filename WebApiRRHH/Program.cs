@@ -1,5 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using WebApiRRHH.Context;
+using WebApiRRHH.Repositories;
+using WebApiRRHH.Repositories.Interfaces;
+using WebApiRRHH.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -39,6 +42,19 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+builder.Logging.AddDebug();
+
+if (builder.Environment.IsProduction())
+{
+    // En producción, configurar niveles más restrictivos
+    builder.Logging.AddFilter("Microsoft.EntityFrameworkCore", LogLevel.Warning);
+}
+
+//builder.Services.AddHealthChecks()
+//    .AddDbContextCheck<AppDBContext>();
 
 var app = builder.Build();
 
