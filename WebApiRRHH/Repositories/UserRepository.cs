@@ -101,7 +101,6 @@ namespace WebApiRRHH.Repositories
                 if (user == null)
                     return false;
 
-                // Soft delete - solo marcar como inactivo
                 user.IsActive = false;
                 user.UpdatedAt = DateTime.UtcNow;
                 await _context.SaveChangesAsync();

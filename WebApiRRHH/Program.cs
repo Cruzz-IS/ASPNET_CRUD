@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 using WebApiRRHH.Context;
 using WebApiRRHH.Repositories;
 using WebApiRRHH.Repositories.Interfaces;
@@ -41,7 +42,33 @@ builder.Services.AddCors(options =>
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+//builder.Services.AddSwaggerGen();
+
+// 6. CONFIGURACIÓN DE SWAGGER/OpenAPI
+// ========================================
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "API RRHH",
+        Version = "v1",
+        Description = "API RESTful para gestión de recursos humanos",
+        Contact = new OpenApiContact
+        {
+            Name = "Equipo de Desarrollo",
+            Email = "dev@example.com"
+        }
+    });
+
+    // Incluir comentarios XML
+    var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    if (File.Exists(xmlPath))
+    {
+        c.IncludeXmlComments(xmlPath);
+    }
+});
 
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
