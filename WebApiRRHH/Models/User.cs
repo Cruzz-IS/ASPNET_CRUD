@@ -66,7 +66,7 @@ namespace WebApiRRHH.Models
         public string Role { get; set; } = "Employee"; // Admin, Manager, Employee
 
         // Relación con RefreshTokens
-        //public virtual ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
+        public virtual ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
 
         [NotMapped]
         public bool IsLockedOut => LockoutEnd.HasValue && LockoutEnd.Value > DateTime.UtcNow;

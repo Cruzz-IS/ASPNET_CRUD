@@ -22,6 +22,129 @@ namespace WebApiRRHH.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("WebApiRRHH.Models.Audit", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Action")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("EntityId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("EntityType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("IpAddress")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("NewValues")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OldValues")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Severity")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<DateTime>("Timestamp")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<string>("UserAgent")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserEmail")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<int?>("UserId")
+                        .IsRequired()
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Action")
+                        .HasDatabaseName("IX_AuditLogs_Action");
+
+                    b.HasIndex("Timestamp")
+                        .HasDatabaseName("IX_AuditLogs_Timestamp");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("IX_AuditLogs_UserId");
+
+                    b.ToTable("Audits");
+                });
+
+            modelBuilder.Entity("WebApiRRHH.Models.RefreshToken", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("IpAddress")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<bool>("IsRevoked")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsUsed")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("JwtId")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("UserAgent")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ExpiresAt")
+                        .HasDatabaseName("IX_RefreshTokens_ExpiresAt");
+
+                    b.HasIndex("Token")
+                        .HasDatabaseName("IX_RefreshTokens_Token");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("IX_RefreshTokens_UserId");
+
+                    b.ToTable("RefreshTokens");
+                });
+
             modelBuilder.Entity("WebApiRRHH.Models.User", b =>
                 {
                     b.Property<int>("Id")
@@ -119,45 +242,72 @@ namespace WebApiRRHH.Migrations
                         new
                         {
                             Id = 1,
-                            CreatedAt = new DateTime(2026, 4, 10, 20, 28, 36, 762, DateTimeKind.Utc).AddTicks(764),
+                            CreatedAt = new DateTime(2026, 4, 11, 5, 40, 36, 783, DateTimeKind.Utc).AddTicks(1020),
                             Email = "admin@gmail.com",
                             EmailConfirmed = true,
                             FailedLoginAttempts = 0,
                             IsActive = true,
                             Name = "Admin",
-                            PasswordChangedDate = new DateTime(2026, 4, 10, 20, 28, 36, 762, DateTimeKind.Utc).AddTicks(765),
-                            PasswordHash = "$2a$11$VAIs76c.8EHk.xYe4DuF3OphojU0QqvLzNzpysm5dbSOejAikI8BO",
+                            PasswordChangedDate = new DateTime(2026, 4, 11, 5, 40, 36, 783, DateTimeKind.Utc).AddTicks(1021),
+                            PasswordHash = "$2a$11$FLsW5L7u3glmPGjmODdN.eNrJyV8Pa7qUP4gM/AyMPBFItkO7BnzG",
                             PhoneNumber = "+504 9999-0000",
                             Role = "Admin"
                         },
                         new
                         {
                             Id = 2,
-                            CreatedAt = new DateTime(2026, 4, 10, 20, 28, 36, 762, DateTimeKind.Utc).AddTicks(774),
+                            CreatedAt = new DateTime(2026, 4, 11, 5, 40, 36, 783, DateTimeKind.Utc).AddTicks(1030),
                             Email = "juan.perez@yahoo.com",
                             EmailConfirmed = true,
                             FailedLoginAttempts = 0,
                             IsActive = true,
                             Name = "Juan",
-                            PasswordChangedDate = new DateTime(2026, 4, 10, 20, 28, 36, 762, DateTimeKind.Utc).AddTicks(774),
-                            PasswordHash = "$2a$11$7u3QkCJJBwNrgnoH7MNB8epC1QHT.VypVA1bRHeOxDHaa.pvgIxAC",
+                            PasswordChangedDate = new DateTime(2026, 4, 11, 5, 40, 36, 783, DateTimeKind.Utc).AddTicks(1030),
+                            PasswordHash = "$2a$11$ULJVV3o9Y3Sp/FOQAXV/C.VOLSV8LM1Nf1TmwRFIF3cjK/eLobPx.",
                             PhoneNumber = "+504 9999-8888",
                             Role = "Empleado"
                         },
                         new
                         {
                             Id = 3,
-                            CreatedAt = new DateTime(2026, 4, 10, 20, 28, 36, 762, DateTimeKind.Utc).AddTicks(778),
+                            CreatedAt = new DateTime(2026, 4, 11, 5, 40, 36, 783, DateTimeKind.Utc).AddTicks(1034),
                             Email = "maria.gonzalez@gmail.com",
                             EmailConfirmed = true,
                             FailedLoginAttempts = 0,
                             IsActive = true,
                             Name = "María",
-                            PasswordChangedDate = new DateTime(2026, 4, 10, 20, 28, 36, 762, DateTimeKind.Utc).AddTicks(779),
-                            PasswordHash = "$2a$11$7u3QkCJJBwNrgnoH7MNB8epC1QHT.VypVA1bRHeOxDHaa.pvgIxAC",
+                            PasswordChangedDate = new DateTime(2026, 4, 11, 5, 40, 36, 783, DateTimeKind.Utc).AddTicks(1035),
+                            PasswordHash = "$2a$11$ULJVV3o9Y3Sp/FOQAXV/C.VOLSV8LM1Nf1TmwRFIF3cjK/eLobPx.",
                             PhoneNumber = "+504 9999-7777",
                             Role = "Cliente"
                         });
+                });
+
+            modelBuilder.Entity("WebApiRRHH.Models.Audit", b =>
+                {
+                    b.HasOne("WebApiRRHH.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("WebApiRRHH.Models.RefreshToken", b =>
+                {
+                    b.HasOne("WebApiRRHH.Models.User", "User")
+                        .WithMany("RefreshTokens")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("WebApiRRHH.Models.User", b =>
+                {
+                    b.Navigation("RefreshTokens");
                 });
 #pragma warning restore 612, 618
         }

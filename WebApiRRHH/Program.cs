@@ -1,14 +1,35 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System.Text;
+using WebApiRRHH.Configuration;
 using WebApiRRHH.Context;
 using WebApiRRHH.Repositories;
 using WebApiRRHH.Repositories.Interfaces;
 using WebApiRRHH.Services;
+using WebApiRRHH.Services.Auth;
+using WebApiRRHH.Services.Security;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// CONFIGURACIÓN DE VARIABLES DE ENTORNO
 //Agregar la configuracion de UserSecrets para manejar la cadena de conexion a la base de datos de forma segura
-builder.Configuration.AddUserSecrets<Program>();
+if (builder.Environment.IsDevelopment())
+{
+    builder.Configuration.AddUserSecrets<Program>();
+}
+builder.Configuration.AddEnvironmentVariables();
+
+// CONFIGURACIÓN DE SETTINGS
+var jwtSettings = new JwtSettings();
+builder.Configuration.GetSection("JwtSettings").Bind(jwtSettings);
+builder.Services.AddSingleton(jwtSettings);
+
+var securitySettings = new SecuritySettings();
+builder.Configuration.GetSection("SecuritySettings").Bind(securitySettings);
+builder.Services.AddSingleton(securitySettings);
 
 // Add services to the container.
 
@@ -21,11 +42,70 @@ builder.Services.AddDbContext<AppDBContext>(
     options => options.UseSqlServer(connectionString)
 );
 
+// AUTENTICACIÓN Y AUTORIZACIÓN JWT
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.SaveToken = true;
+    options.RequireHttpsMetadata = !builder.Environment.IsDevelopment(); // Solo HTTPS en producción
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = jwtSettings.Issuer,
+        ValidAudience = jwtSettings.Audience,
+        IssuerSigningKey = new SymmetricSecurityKey(
+            Encoding.UTF8.GetBytes(jwtSettings.Secret)),
+        ClockSkew = TimeSpan.Zero // Eliminar tolerancia de tiempo
+    };
+
+    options.Events = new JwtBearerEvents
+    {
+        OnAuthenticationFailed = context =>
+        {
+            var logger = context.HttpContext.RequestServices
+                .GetRequiredService<ILogger<Program>>();
+            logger.LogWarning("Autenticación fallida: {Error}", context.Exception.Message);
+            return Task.CompletedTask;
+        },
+        OnTokenValidated = context =>
+        {
+            var logger = context.HttpContext.RequestServices
+                .GetRequiredService<ILogger<Program>>();
+            var userId = context.Principal?.FindFirst("sub")?.Value;
+            logger.LogInformation("Token validado para usuario: {UserId}", userId);
+            return Task.CompletedTask;
+        }
+    };
+});
+
+builder.Services.AddAuthorization(options =>
+{
+    // Políticas de autorización basadas en roles
+    options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
+    options.AddPolicy("ManagerOrAdmin", policy => policy.RequireRole("Admin", "Manager"));
+    options.AddPolicy("AllUsers", policy => policy.RequireRole("Admin", "Manager", "Employee"));
+});
+
 // Repositorios
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 // Servicios
 builder.Services.AddScoped<IUserService, UserService>();
+
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IAuditService, AuditService>();
+
+builder.Services.AddScoped<IPasswordHash, PasswordHash>();
+builder.Services.AddScoped<IJwtService, JwtService>();
+builder.Services.AddScoped<IEncryptionService, EncryptionService>();
 
 
 builder.Services.AddCors(options =>
@@ -39,13 +119,21 @@ builder.Services.AddCors(options =>
     });
 });
 
-builder.Services.AddControllers();
+//  CONFIGURACIÓN DE CONTROLLERS Y API
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.PropertyNamingPolicy = null;
+        options.JsonSerializerOptions.WriteIndented = builder.Environment.IsDevelopment();
+        // Ignorar ciclos de referencia
+        options.JsonSerializerOptions.ReferenceHandler =
+            System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+    });
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 //builder.Services.AddSwaggerGen();
 
-// 6. CONFIGURACIÓN DE SWAGGER/OpenAPI
-// ========================================
+// CONFIGURACIÓN DE SWAGGER/OpenAPI
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -70,9 +158,15 @@ builder.Services.AddSwaggerGen(c =>
     }
 });
 
+// CONFIGURACIÓN DE LOGGING
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 builder.Logging.AddDebug();
+
+if (builder.Environment.IsProduction())
+{
+    builder.Logging.AddFilter("Microsoft.EntityFrameworkCore", LogLevel.Warning);
+}
 
 if (builder.Environment.IsProduction())
 {
@@ -83,6 +177,21 @@ if (builder.Environment.IsProduction())
 //builder.Services.AddHealthChecks()
 //    .AddDbContextCheck<AppDBContext>();
 
+//  RATE LIMITING (Protección contra ataques)
+builder.Services.AddRateLimiter(options =>
+{
+    options.GlobalLimiter = System.Threading.RateLimiting.PartitionedRateLimiter.Create<HttpContext, string>(
+        httpContext => System.Threading.RateLimiting.RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: httpContext.User.Identity?.Name ?? httpContext.Request.Headers.Host.ToString(),
+            factory: partition => new System.Threading.RateLimiting.FixedWindowRateLimiterOptions
+            {
+                AutoReplenishment = true,
+                PermitLimit = 100,
+                QueueLimit = 0,
+                Window = TimeSpan.FromMinutes(1)
+            }));
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -92,9 +201,13 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseHttpsRedirection();
+
 app.UseCors("AllowFrontend");
 
-app.UseHttpsRedirection();
+app.UseRateLimiter();
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 
