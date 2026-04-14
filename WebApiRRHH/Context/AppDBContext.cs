@@ -7,8 +7,8 @@ namespace WebApiRRHH.Context
     public class AppDBContext : DbContext
     {
         public DbSet<User> Users { get; set; } = null!;
-        //public DbSet<RefreshToken> RefreshTokens { get; set; } = null!;
-        //public DbSet<AuditLog> AuditLogs { get; set; } = null!;
+        public DbSet<RefreshToken> RefreshTokens { get; set; } = null!;
+        public DbSet<Audit> Audits { get; set; } = null!;
 
         public AppDBContext(DbContextOptions<AppDBContext> options) : base(options) { }
 
@@ -53,44 +53,44 @@ namespace WebApiRRHH.Context
                     .HasMaxLength(50)
                     .HasDefaultValue("Employee");
 
-                // Relación con RefreshTokens
-                //entity.HasMany(u => u.RefreshTokens)
-                //    .WithOne(rt => rt.User)
-                //    .HasForeignKey(rt => rt.UserId)
-                //    .OnDelete(DeleteBehavior.Cascade);
+                //Relación con RefreshTokens
+                entity.HasMany(u => u.RefreshTokens)
+                    .WithOne(rt => rt.User)
+                    .HasForeignKey(rt => rt.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
             });
 
-            // Configuración de RefreshToken
-            //modelBuilder.Entity<RefreshToken>(entity =>
-            //{
-            //    entity.HasIndex(e => e.Token)
-            //        .HasDatabaseName("IX_RefreshTokens_Token");
+            //Configuración de RefreshToken
+            modelBuilder.Entity<RefreshToken>(entity =>
+            {
+                entity.HasIndex(e => e.Token)
+                    .HasDatabaseName("IX_RefreshTokens_Token");
 
-            //    entity.HasIndex(e => e.UserId)
-            //        .HasDatabaseName("IX_RefreshTokens_UserId");
+                entity.HasIndex(e => e.UserId)
+                    .HasDatabaseName("IX_RefreshTokens_UserId");
 
-            //    entity.HasIndex(e => e.ExpiresAt)
-            //        .HasDatabaseName("IX_RefreshTokens_ExpiresAt");
+                entity.HasIndex(e => e.ExpiresAt)
+                    .HasDatabaseName("IX_RefreshTokens_ExpiresAt");
 
-            //    entity.Property(e => e.CreatedAt)
-            //        .HasDefaultValueSql("GETUTCDATE()");
-            //});
+                entity.Property(e => e.CreatedAt)
+                    .HasDefaultValueSql("GETUTCDATE()");
+            });
 
-            // Configuración de AuditLog
-            //modelBuilder.Entity<AuditLog>(entity =>
-            //{
-            //    entity.HasIndex(e => e.UserId)
-            //        .HasDatabaseName("IX_AuditLogs_UserId");
+            //Configuración de AuditLog
+            modelBuilder.Entity<Audit>(entity =>
+            {
+                entity.HasIndex(e => e.UserId)
+                    .HasDatabaseName("IX_AuditLogs_UserId");
 
-            //    entity.HasIndex(e => e.Timestamp)
-            //        .HasDatabaseName("IX_AuditLogs_Timestamp");
+                entity.HasIndex(e => e.Timestamp)
+                    .HasDatabaseName("IX_AuditLogs_Timestamp");
 
-            //    entity.HasIndex(e => e.Action)
-            //        .HasDatabaseName("IX_AuditLogs_Action");
+                entity.HasIndex(e => e.Action)
+                    .HasDatabaseName("IX_AuditLogs_Action");
 
-            //    entity.Property(e => e.Timestamp)
-            //        .HasDefaultValueSql("GETUTCDATE()");
-            //});
+                entity.Property(e => e.Timestamp)
+                    .HasDefaultValueSql("GETUTCDATE()");
+            });
 
             // Datos de prueba 
             SeedData(modelBuilder);
