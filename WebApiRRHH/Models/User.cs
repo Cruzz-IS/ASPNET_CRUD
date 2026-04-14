@@ -63,7 +63,7 @@ namespace WebApiRRHH.Models
         // Roles
         [Required]
         [StringLength(50)]
-        public string Role { get; set; } = "Employee"; // Admin, Manager, Employee
+        public string Role { get; set; } = "Empleado"; // Admin, Manager, Empleado, Cliente
 
         // Relación con RefreshTokens
         public virtual ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();

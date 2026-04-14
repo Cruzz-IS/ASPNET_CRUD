@@ -67,12 +67,12 @@ namespace WebApiRRHH.Services.Auth
                 // Crear usuario
                 var user = new User
                 {
-                    Name = registerDto.FirstName,
+                    Name = registerDto.Name,
                     //LastName = registerDto.LastName,
                     Email = registerDto.Email.ToLower(),
                     PasswordHash = _passwordHasher.HashPassword(registerDto.Password),
                     PhoneNumber = registerDto.PhoneNumber,
-                    Role = "Employee", // Rol por defecto
+                    Role = "Cliente", // Rol por defecto
                     IsActive = true,
                     EmailConfirmed = !_securitySettings.RequireEmailConfirmation,
                     CreatedAt = DateTime.UtcNow,

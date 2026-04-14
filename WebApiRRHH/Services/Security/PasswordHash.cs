@@ -16,10 +16,6 @@ namespace WebApiRRHH.Services.Security
 
         /// <summary>
         /// Hash de contraseña usando BCrypt
-        /// BCrypt es más seguro que SHA256 porque:
-        /// 1. Es adaptativo (puede aumentar el costo computacional)
-        /// 2. Incluye salt automáticamente
-        /// 3. Es resistente a ataques de rainbow tables
         /// </summary>
         public string HashPassword(string password)
         {
@@ -49,7 +45,7 @@ namespace WebApiRRHH.Services.Security
         }
 
         /// <summary>
-        /// Genera un token seguro aleatorio para reset de contraseña
+        /// Genera un token seguro aleatorio para resetear la contraseña
         /// </summary>
         public string GenerateSecureToken(int length = 32)
         {
@@ -65,7 +61,7 @@ namespace WebApiRRHH.Services.Security
     }
 
     /// <summary>
-    /// Servicio para encriptación de datos sensibles (AES)
+    /// Servicio para encriptación de datos sensibles 
     /// Usado para encriptar información adicional, no contraseñas
     /// </summary>
     public interface IEncryptionService
@@ -81,15 +77,13 @@ namespace WebApiRRHH.Services.Security
 
         public EncryptionService(IConfiguration configuration)
         {
-            // En producción, estas claves deben venir de Azure Key Vault o similar
+            // En producción, para usar la nube de Azure
             var encryptionKey = configuration["Encryption:Key"]
                 ?? throw new InvalidOperationException("Encryption key not configured");
 
-            // Generar key e IV desde la clave configurada
             using var sha256 = SHA256.Create();
             _key = sha256.ComputeHash(Encoding.UTF8.GetBytes(encryptionKey));
 
-            // IV debe ser de 16 bytes para AES
             _iv = sha256.ComputeHash(Encoding.UTF8.GetBytes(encryptionKey)).Take(16).ToArray();
         }
 

@@ -77,7 +77,7 @@ namespace WebApiRRHH.Controllers
                 if (!result.Success)
                     return Unauthorized(result);
 
-                // Configurar cookie con el refresh token, mas seguro.
+                // Configurar cookie con el refresh token, mas seguro para evitar que roben de datos del usuario.
                 SetRefreshTokenCookie(result.RefreshToken!);
 
                 return Ok(result);
@@ -295,9 +295,7 @@ namespace WebApiRRHH.Controllers
                     Id = userId.Value,
                     Email = email ?? "",
                     Name = name ?? "",
-                    Role = role ?? "",
-                    Department = department,
-                    Position = position
+                    Role = role ?? ""
                 };
 
                 return Ok(userInfo);

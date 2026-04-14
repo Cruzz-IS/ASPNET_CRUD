@@ -6,12 +6,12 @@ namespace WebApiRRHH.DTOs.Auth
     public class RegisterDto
     {
         [Required(ErrorMessage = "El nombre es requerido")]
-        [StringLength(100, MinimumLength = 2)]
-        public string FirstName { get; set; } = string.Empty;
+        [StringLength(80, MinimumLength = 2)]
+        public string Name { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "El apellido es requerido")]
-        [StringLength(100, MinimumLength = 2)]
-        public string LastName { get; set; } = string.Empty;
+        //[Required(ErrorMessage = "El apellido es requerido")]
+        //[StringLength(100, MinimumLength = 2)]
+        //public string LastName { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "El email es requerido")]
         [EmailAddress(ErrorMessage = "El formato del email no es válido")]
@@ -30,8 +30,7 @@ namespace WebApiRRHH.DTOs.Auth
         [Phone]
         public string? PhoneNumber { get; set; }
 
-        public string? Position { get; set; }
-        public string? Department { get; set; }
+
     }
 
     // DTO para login
@@ -67,8 +66,6 @@ namespace WebApiRRHH.DTOs.Auth
         //public string LastName { get; set; } = string.Empty;
         //public string FullName { get; set; } = string.Empty;
         public string Role { get; set; } = string.Empty;
-        public string? Position { get; set; }
-        public string? Department { get; set; }
         public bool EmailConfirmed { get; set; }
     }
 

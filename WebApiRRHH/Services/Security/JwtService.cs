@@ -60,7 +60,7 @@ namespace WebApiRRHH.Services.Security
         }
 
         /// <summary>
-        /// Genera un Refresh Token aleatorio y seguro
+        /// Genera un Refresh Token aleatorio y seguro para evitar que se roben informacion de los usuarios
         /// </summary>
         public string GenerateRefreshToken()
         {
@@ -116,7 +116,7 @@ namespace WebApiRRHH.Services.Security
         }
 
         /// <summary>
-        /// Valida un token y retorna el ID del usuario si es válido
+        /// Valida un token y retorna el ID del usuario si este es valido
         /// </summary>
         public string? ValidateToken(string token)
         {
