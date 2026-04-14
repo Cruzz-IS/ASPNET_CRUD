@@ -5,7 +5,7 @@ namespace WebApiRRHH.Services.Auth
 {
     public interface IAuditService
     {
-        // Esta es la firma exacta que pide tu AuthService
+
         Task LogAsync(
             string action,
             string entityType,
@@ -61,7 +61,7 @@ namespace WebApiRRHH.Services.Auth
             }
             catch (Exception ex)
             {
-                // Importante: No dejar que un error en auditoría detenga el flujo principal
+                // No dejar que un error en auditoría detenga el flujo principal de la API
                 _logger.LogError(ex, "Error al guardar registro de auditoría");
             }
         }

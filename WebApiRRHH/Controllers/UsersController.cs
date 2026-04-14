@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using WebApiRRHH.DTOs;
 using WebApiRRHH.Services;
 
@@ -23,6 +24,7 @@ namespace WebApiRRHH.Controllers
         /// </summary>
         /// <returns>Lista de usuarios</returns>
         /// <response code="200">Retorna la lista de usuarios</response>
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         [ProducesResponseType(typeof(IEnumerable<UserResponseDto>), StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<UserResponseDto>>> GetUsers()
@@ -46,6 +48,7 @@ namespace WebApiRRHH.Controllers
         /// <returns>Usuario encontrado</returns>
         /// <response code="200">Usuario encontrado</response>
         /// <response code="404">Usuario no encontrado</response>
+        [Authorize(Roles = "Cliente")]
         [HttpGet("{id}")]
         [ProducesResponseType(typeof(UserResponseDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -77,6 +80,7 @@ namespace WebApiRRHH.Controllers
         /// <returns>Usuario creado</returns>
         /// <response code="201">Usuario creado exitosamente</response>
         /// <response code="400">Datos de entrada inválidos</response>
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         [ProducesResponseType(typeof(UserResponseDto), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -118,6 +122,7 @@ namespace WebApiRRHH.Controllers
         /// <response code="200">Usuario actualizado exitosamente</response>
         /// <response code="400">Datos de entrada inválidos</response>
         /// <response code="404">Usuario no encontrado</response>
+        [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
         [ProducesResponseType(typeof(UserResponseDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -161,6 +166,7 @@ namespace WebApiRRHH.Controllers
         /// <returns>Confirmación de eliminación</returns>
         /// <response code="204">Usuario eliminado exitosamente</response>
         /// <response code="404">Usuario no encontrado</response>
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]

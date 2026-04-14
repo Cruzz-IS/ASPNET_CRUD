@@ -60,7 +60,7 @@ namespace WebApiRRHH.Services.Security
         }
 
         /// <summary>
-        /// Genera un Refresh Token aleatorio y seguro para evitar que se roben informacion de los usuarios
+        /// Genera un Refresh Token aleatorio y seguro para evitar que se roben informacion del usuarios
         /// </summary>
         public string GenerateRefreshToken()
         {
