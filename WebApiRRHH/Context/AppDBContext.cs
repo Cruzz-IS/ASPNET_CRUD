@@ -28,7 +28,7 @@ namespace WebApiRRHH.Context
                 entity.HasIndex(e => e.IsActive)
                     .HasDatabaseName("IX_Users_IsActive");
 
-                // Índice para role
+                // Índice para los roles de un usuario
                 entity.HasIndex(e => e.Role)
                     .HasDatabaseName("IX_Users_Role");
 
@@ -53,7 +53,7 @@ namespace WebApiRRHH.Context
                     .HasMaxLength(50)
                     .HasDefaultValue("Employee");
 
-                //Relación con RefreshTokens
+                //Relación con RefreshTokens trabla users y tabla refreshTokens
                 entity.HasMany(u => u.RefreshTokens)
                     .WithOne(rt => rt.User)
                     .HasForeignKey(rt => rt.UserId)
@@ -92,13 +92,13 @@ namespace WebApiRRHH.Context
                     .HasDefaultValueSql("GETUTCDATE()");
             });
 
-            // Datos de prueba 
+            // Datos de prueba esto para cargar datos cuando se hace una migracion
             SeedData(modelBuilder);
         }
 
         private void SeedData(ModelBuilder modelBuilder)
         {
-            // Password: Admin@123 (hasheado con BCrypt)
+            // Password: Admin@123 (hasheado con BCrypt para no guardar la contraseña rela en la BD)
             var adminPasswordHash = BCrypt.Net.BCrypt.HashPassword("Admin@123");
             var userPasswordHash = BCrypt.Net.BCrypt.HashPassword("User@123");
 
