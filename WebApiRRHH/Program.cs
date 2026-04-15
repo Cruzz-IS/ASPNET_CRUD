@@ -234,6 +234,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseGlobalExceptionHandler();
+
 app.UseRequestLogging();
 
 app.UseCors("AllowFrontend");
