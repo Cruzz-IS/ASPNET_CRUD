@@ -6,6 +6,7 @@ using Microsoft.OpenApi.Models;
 using System.Text;
 using WebApiRRHH.Configuration;
 using WebApiRRHH.Context;
+using WebApiRRHH.Middleware;
 using WebApiRRHH.Repositories;
 using WebApiRRHH.Repositories.Interfaces;
 using WebApiRRHH.Services;
@@ -232,6 +233,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseRequestLogging();
 
 app.UseCors("AllowFrontend");
 
