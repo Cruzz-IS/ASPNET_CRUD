@@ -6,7 +6,7 @@ using Microsoft.OpenApi.Models;
 using System.Text;
 using WebApiRRHH.Configuration;
 using WebApiRRHH.Context;
-using WebApiRRHH.Middleware;
+//using WebApiRRHH.Middleware;
 using WebApiRRHH.Repositories;
 using WebApiRRHH.Repositories.Interfaces;
 using WebApiRRHH.Services;
@@ -67,6 +67,7 @@ builder.Services.AddAuthentication(options =>
         ClockSkew = TimeSpan.Zero // Eliminar tolerancia de tiempo
     };
 
+    // Eventos para logging de autenticacion
     options.Events = new JwtBearerEvents
     {
         OnAuthenticationFailed = context =>
@@ -132,6 +133,7 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.ReferenceHandler =
             System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
     });
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 //builder.Services.AddSwaggerGen();
@@ -199,12 +201,6 @@ if (builder.Environment.IsProduction())
     builder.Logging.AddFilter("Microsoft.EntityFrameworkCore", LogLevel.Warning);
 }
 
-if (builder.Environment.IsProduction())
-{
-    // En producción, configurar niveles más restrictivos
-    builder.Logging.AddFilter("Microsoft.EntityFrameworkCore", LogLevel.Warning);
-}
-
 //builder.Services.AddHealthChecks()
 //    .AddDbContextCheck<AppDBContext>();
 
@@ -225,6 +221,10 @@ builder.Services.AddRateLimiter(options =>
 
 var app = builder.Build();
 
+// ========================================
+//  MIDDLEWARE
+// ========================================
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -232,13 +232,14 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+
+//app.UseGlobalExceptionHandler();
+
 app.UseHttpsRedirection();
 
-app.UseGlobalExceptionHandler();
+//app.UseRequestLogging();
 
-app.UseRequestLogging();
-
-app.UseCors("AllowFrontend");
+app.UseCors(builder.Environment.IsDevelopment() ? "DevelopmentCors" : "AllowSpecificOrigins");
 
 app.UseRateLimiter();
 

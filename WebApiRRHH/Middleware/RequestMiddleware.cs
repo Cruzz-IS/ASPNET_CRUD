@@ -86,7 +86,7 @@ namespace WebApiRRHH.Middleware
         }
     }
 
-    // Extension method para registrar el middleware fácilmente
+    // Extension method
     public static class RequestMiddlewareExtensions
     {
         public static IApplicationBuilder UseRequestLogging(this IApplicationBuilder builder)
