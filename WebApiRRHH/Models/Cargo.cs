@@ -15,5 +15,17 @@ namespace WebApiRRHH.Models
         public string Name { get; set; } = string.Empty;
 
         public int SueldoBase { get; set; }
+
+        // Auditoría
+        [Required]
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+        public DateTime? UpdatedAt { get; set; }
+
+        [StringLength(50)]
+        public string? CreatedBy { get; set; }
+
+        [StringLength(50)]
+        public string? UpdatedBy { get; set; }
     }
 }

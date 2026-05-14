@@ -28,6 +28,10 @@ namespace WebApiRRHH.Models
         [StringLength(20)]
         public string? PhoneNumber { get; set; }
 
+        [Required(ErrorMessage = "El nombre es requerido")]
+        [StringLength(13, MinimumLength = 1, ErrorMessage = "El DNI debe tener entre 1 y 13 caracteres")]
+        public string DNI { get; set; } = string.Empty;
+
         [StringLength(20, MinimumLength = 2, ErrorMessage = "El nombre de usuario debe tener entre 2 y 20 caracteres")]
         public string? Username { get; set; }
 
