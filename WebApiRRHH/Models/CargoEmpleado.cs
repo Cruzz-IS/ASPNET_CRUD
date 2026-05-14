@@ -8,7 +8,19 @@ namespace WebApiRRHH.Models
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int Id { get; set; }
+        public int IdCargo { get; set; }
+
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int IdEmpleado { get; set; }
+
+        [ForeignKey("IdCargo")]
+
+        public virtual Cargo Cargo { get; set; } = null!;
+
+        [ForeignKey("IdEmpleado")]
+
+        public virtual User User { get; set; } = null!;
 
         // Auditoría
         [Required]
