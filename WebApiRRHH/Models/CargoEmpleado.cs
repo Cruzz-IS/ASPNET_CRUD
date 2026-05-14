@@ -1,6 +1,9 @@
-﻿namespace WebApiRRHH.Models
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace WebApiRRHH.Models
 {
-    public class CargoEmpleadocs
+    [Table("CargoEmpleado")]
+    public class CargoEmpleado
     {
     }
 }
