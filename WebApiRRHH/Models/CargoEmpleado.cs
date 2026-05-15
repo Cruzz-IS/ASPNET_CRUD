@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace WebApiRRHH.Models
 {
     [Table("CargoEmpleado")]
-    public class CargoEmpleado
+    public class CargoEmpleado : BaseEntity
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -20,18 +20,8 @@ namespace WebApiRRHH.Models
 
         [ForeignKey("IdEmpleado")]
 
-        public virtual User User { get; set; } = null!;
+        public virtual Empleado Empleado { get; set; } = null!;
 
-        // Auditoría
-        [Required]
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-
-        public DateTime? UpdatedAt { get; set; }
-
-        [StringLength(50)]
-        public string? CreatedBy { get; set; }
-
-        [StringLength(50)]
-        public string? UpdatedBy { get; set; }
+        public DateTime? fechaNombramiento { get; set; }
     }
 }

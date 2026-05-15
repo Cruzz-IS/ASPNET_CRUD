@@ -8,7 +8,7 @@ using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace WebApiRRHH.Models
 {
-    [Table("Audits")]
+    [Table("Audit")]
     public class Audit
     {
         [Key]
@@ -20,7 +20,7 @@ namespace WebApiRRHH.Models
 
         // Relación con User
         [ForeignKey("UserId")]
-        public virtual User User { get; set; } = null!;
+        public virtual Empleado Empleado { get; set; } = null!;
 
         [StringLength(200)]
         public string? UserEmail { get; set; }

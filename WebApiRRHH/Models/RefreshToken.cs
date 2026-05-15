@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace WebApiRRHH.Models
 {
-    [Table("RefreshTokens")]
+    [Table("RefreshToken")]
     public class RefreshToken
     {
         [Key]
@@ -39,7 +39,7 @@ namespace WebApiRRHH.Models
 
         // Relación con User
         [ForeignKey("UserId")]
-        public virtual User User { get; set; } = null!;
+        public virtual Empleado Empleado { get; set; } = null!;
 
         [NotMapped]
         public bool IsExpired => DateTime.UtcNow >= ExpiresAt;

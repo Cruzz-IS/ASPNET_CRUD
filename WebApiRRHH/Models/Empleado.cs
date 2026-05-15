@@ -3,8 +3,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace WebApiRRHH.Models
 {
-    [Table("Users")]
-    public class User
+    [Table("Empleado")]
+    public class Empleado : BaseEntity
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -32,6 +32,9 @@ namespace WebApiRRHH.Models
         [StringLength(13, MinimumLength = 1, ErrorMessage = "El DNI debe tener entre 1 y 13 caracteres")]
         public string DNI { get; set; } = string.Empty;
 
+        public string? EstadoCivil { get; set; }
+        public string? TipoContrato { get; set; }
+
         [StringLength(20, MinimumLength = 2, ErrorMessage = "El nombre de usuario debe tener entre 2 y 20 caracteres")]
         public string? Username { get; set; }
 
@@ -52,18 +55,6 @@ namespace WebApiRRHH.Models
 
         public DateTime? ResetPasswordTokenExpiry { get; set; }
 
-        // Auditoría
-        [Required]
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-
-        public DateTime? UpdatedAt { get; set; }
-
-        [StringLength(50)]
-        public string? CreatedBy { get; set; }
-
-        [StringLength(50)]
-        public string? UpdatedBy { get; set; }
-
         // Roles
         [Required]
         [StringLength(50)]
@@ -74,5 +65,14 @@ namespace WebApiRRHH.Models
 
         [NotMapped]
         public bool IsLockedOut => LockoutEnd.HasValue && LockoutEnd.Value > DateTime.UtcNow;
+
+        // Relación recursiva (Jefe)
+        public int? idEmpleadoJefe { get; set; }
+        [ForeignKey("idEmpleadoJefe")]
+        public virtual Empleado? Jefe { get; set; }
+
+        // Relaciones muchos a muchos (Navegación)
+        public virtual ICollection<CargoEmpleado> CargosEmpleados { get; set; } = new List<CargoEmpleado>();
+        public virtual ICollection<EmpleadoBono> EmpleadoBonos { get; set; } = new List<EmpleadoBono>();
     }
 }
