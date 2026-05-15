@@ -28,13 +28,13 @@ namespace WebApiRRHH.Middleware
             var path = request.Path;
             var queryString = request.QueryString;
             var ipAddress = GetIpAddress(context);
-            var userAgent = request.Headers["User-Agent"].ToString();
-            var userId = context.User?.FindFirst("sub")?.Value ?? "Anonymous";
+            var empleadoAgent = request.Headers["Empleado-Agent"].ToString();
+            var empleadoId = context.User?.FindFirst("sub")?.Value ?? "Anonymous";
 
             // Log de request entrante de parte del cliente
             _logger.LogInformation(
-                "HTTP {Method} {Path}{QueryString} - User: {UserId} - IP: {IpAddress}",
-                method, path, queryString, userId, ipAddress);
+                "HTTP {Method} {Path}{QueryString} - Empleado: {EmpleadoId} - IP: {IpAddress}",
+                method, path, queryString, empleadoId, ipAddress);
 
             // Capturar la respuesta 
             var originalBodyStream = context.Response.Body;
@@ -56,8 +56,8 @@ namespace WebApiRRHH.Middleware
                            LogLevel.Information;
 
                 _logger.Log(level,
-                    "HTTP {Method} {Path} responded {StatusCode} in {ElapsedMs}ms - User: {UserId}",
-                    method, path, statusCode, stopwatch.ElapsedMilliseconds, userId);
+                    "HTTP {Method} {Path} responded {StatusCode} in {ElapsedMs}ms - Empleado: {EmpleadoId}",
+                    method, path, statusCode, stopwatch.ElapsedMilliseconds, empleadoId);
 
                 await responseBody.CopyToAsync(originalBodyStream);
             }
@@ -65,8 +65,8 @@ namespace WebApiRRHH.Middleware
             {
                 stopwatch.Stop();
                 _logger.LogError(ex,
-                    "HTTP {Method} {Path} failed after {ElapsedMs}ms - User: {UserId} - Error: {Error}",
-                    method, path, stopwatch.ElapsedMilliseconds, userId, ex.Message);
+                    "HTTP {Method} {Path} failed after {ElapsedMs}ms - Empleado: {EmpleadoId} - Error: {Error}",
+                    method, path, stopwatch.ElapsedMilliseconds, empleadoId, ex.Message);
                 throw;
             }
             finally

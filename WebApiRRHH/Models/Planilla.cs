@@ -7,7 +7,7 @@ namespace WebApiRRHH.Models
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int Id { get; set; }
+        public int IdPlanilla { get; set; }
         public DateTime FechaEfectiva { get; set; }
         public DateTime FechaInicio { get; set; }
         public DateTime FechaFin { get; set; }

@@ -12,14 +12,14 @@ namespace WebApiRRHH.Services.Auth
 {
     public interface IAuthService
     {
-        Task<AuthResponseDto> RegisterAsync(RegisterDto registerDto, string ipAddress, string userAgent);
-        Task<AuthResponseDto> LoginAsync(LoginDto loginDto, string ipAddress, string userAgent);
-        Task<AuthResponseDto> RefreshTokenAsync(RefreshTokenDto refreshTokenDto, string ipAddress, string userAgent);
+        Task<AuthResponseDto> RegisterAsync(RegisterDto registerDto, string ipAddress, string empleadoAgent);
+        Task<AuthResponseDto> LoginAsync(LoginDto loginDto, string ipAddress, string empleadoAgent);
+        Task<AuthResponseDto> RefreshTokenAsync(RefreshTokenDto refreshTokenDto, string ipAddress, string empleadoAgent);
         Task<bool> RevokeTokenAsync(string refreshToken, string ipAddress);
-        Task<bool> ChangePasswordAsync(int userId, ChangePasswordDto changePasswordDto);
+        Task<bool> ChangePasswordAsync(int empleadoId, ChangePasswordDto changePasswordDto);
         Task<bool> ForgotPasswordAsync(ForgotPasswordDto forgotPasswordDto);
         Task<bool> ResetPasswordAsync(ResetPasswordDto resetPasswordDto);
-        Task<bool> ConfirmEmailAsync(int userId, string token);
+        Task<bool> ConfirmEmailAsync(int empleadoId, string token);
     }
 
     public class AuthService : IAuthService
@@ -50,12 +50,12 @@ namespace WebApiRRHH.Services.Auth
             _auditService = auditService;
         }
 
-        public async Task<AuthResponseDto> RegisterAsync(RegisterDto registerDto, string ipAddress, string userAgent)
+        public async Task<AuthResponseDto> RegisterAsync(RegisterDto registerDto, string ipAddress, string empleadoAgent)
         {
             try
             {
                 // Verificar si el email ya existe, si es el caso no dejara registrar al cliente
-                if (await _context.Users!.AnyAsync(u => u.Email.ToLower() == registerDto.Email.ToLower()))
+                if (await _context.Empleados!.AnyAsync(u => u.Email.ToLower() == registerDto.Email.ToLower()))
                 {
                     return new AuthResponseDto
                     {
@@ -65,7 +65,7 @@ namespace WebApiRRHH.Services.Auth
                 }
 
                 // Crear usuario
-                var user = new User
+                var empleado = new Empleado
                 {
                     Name = registerDto.Name,
                     //LastName = registerDto.LastName,
@@ -79,14 +79,14 @@ namespace WebApiRRHH.Services.Auth
                     PasswordChangedDate = DateTime.UtcNow
                 };
 
-                _context.Users!.Add(user);
+                _context.Empleados!.Add(empleado);
                 await _context.SaveChangesAsync();
 
                 // Registrar en auditoría
-                await _auditService.LogAsync("Register", "User", user.Id, null,
-                    $"Usuario registrado: {user.Email}", ipAddress, userAgent, user.Id);
+                await _auditService.LogAsync("Register", "Empleado", empleado.Id, null,
+                    $"Usuario registrado: {empleado.Email}", ipAddress, empleadoAgent, empleado.Id);
 
-                _logger.LogInformation("Usuario registrado exitosamente: {Email}", user.Email);
+                _logger.LogInformation("Usuario registrado exitosamente: {Email}", empleado.Email);
 
                 // Si requiere confirmación de email, enviar email (implementar después)
                 if (_securitySettings.RequireEmailConfirmation)
@@ -100,7 +100,7 @@ namespace WebApiRRHH.Services.Auth
                 }
 
                 // Generar tokens
-                return await GenerateAuthResponseAsync(user, ipAddress, userAgent);
+                return await GenerateAuthResponseAsync(empleado, ipAddress, empleadoAgent);
             }
             catch (Exception ex)
             {
@@ -113,18 +113,18 @@ namespace WebApiRRHH.Services.Auth
             }
         }
 
-        public async Task<AuthResponseDto> LoginAsync(LoginDto loginDto, string ipAddress, string userAgent)
+        public async Task<AuthResponseDto> LoginAsync(LoginDto loginDto, string ipAddress, string empleadoAgent)
         {
             try
             {
-                var user = await _context.Users!
+                var empleado = await _context.Empleados!
                     .FirstOrDefaultAsync(u => u.Email.ToLower() == loginDto.Email.ToLower());
 
-                if (user == null)
+                if (empleado == null)
                 {
-                    await _auditService.LogAsync("LoginFailed", "User", null, null,
+                    await _auditService.LogAsync("LoginFailed", "Empleado", null, null,
                         $"Intento de login con email no existente: {loginDto.Email}",
-                        ipAddress, userAgent, null, "Warning");
+                        ipAddress, empleadoAgent, null, "Warning");
 
                     return new AuthResponseDto
                     {
@@ -134,13 +134,13 @@ namespace WebApiRRHH.Services.Auth
                 }
 
                 // Verificar si la cuenta está bloqueada
-                if (user.IsLockedOut)
+                if (empleado.IsLockedOut)
                 {
-                    await _auditService.LogAsync("LoginBlocked", "User", user.Id, null,
-                        $"Intento de login en cuenta bloqueada: {user.Email}",
-                        ipAddress, userAgent, user.Id, "Warning");
+                    await _auditService.LogAsync("LoginBlocked", "Empleado", empleado.Id, null,
+                        $"Intento de login en cuenta bloqueada: {empleado.Email}",
+                        ipAddress, empleadoAgent, empleado.Id, "Warning");
 
-                    var remainingTime = (user.LockoutEnd!.Value - DateTime.UtcNow).Minutes;
+                    var remainingTime = (empleado.LockoutEnd!.Value - DateTime.UtcNow).Minutes;
                     return new AuthResponseDto
                     {
                         Success = false,
@@ -149,27 +149,27 @@ namespace WebApiRRHH.Services.Auth
                 }
 
                 // Verificar contraseña
-                if (!_passwordHasher.VerifyPassword(loginDto.Password, user.PasswordHash))
+                if (!_passwordHasher.VerifyPassword(loginDto.Password, empleado.PasswordHash))
                 {
                     // Incrementar intentos fallidos para guardar la cantidad de veces que se a intentado loguear un usuario
-                    user.FailedLoginAttempts++;
+                    empleado.FailedLoginAttempts++;
 
-                    if (user.FailedLoginAttempts >= _securitySettings.MaxLoginAttempts)
+                    if (empleado.FailedLoginAttempts >= _securitySettings.MaxLoginAttempts)
                     {
-                        user.LockoutEnd = DateTime.UtcNow.AddMinutes(_securitySettings.LockoutMinutes);
+                        empleado.LockoutEnd = DateTime.UtcNow.AddMinutes(_securitySettings.LockoutMinutes);
 
-                        await _auditService.LogAsync("AccountLocked", "User", user.Id, null,
-                            $"Cuenta bloqueada por intentos fallidos: {user.Email}",
-                            ipAddress, userAgent, user.Id, "Warning");
+                        await _auditService.LogAsync("AccountLocked", "Empleado", empleado.Id, null,
+                            $"Cuenta bloqueada por intentos fallidos: {empleado.Email}",
+                            ipAddress, empleadoAgent, empleado.Id, "Warning");
 
-                        _logger.LogWarning("Cuenta bloqueada por intentos fallidos: {Email}", user.Email);
+                        _logger.LogWarning("Cuenta bloqueada por intentos fallidos: {Email}", empleado.Email);
                     }
 
                     await _context.SaveChangesAsync();
 
-                    await _auditService.LogAsync("LoginFailed", "User", user.Id, null,
-                        $"Contraseña incorrecta para: {user.Email}",
-                        ipAddress, userAgent, user.Id, "Warning");
+                    await _auditService.LogAsync("LoginFailed", "Empleado", empleado.Id, null,
+                        $"Contraseña incorrecta para: {empleado.Email}",
+                        ipAddress, empleadoAgent, empleado.Id, "Warning");
 
                     return new AuthResponseDto
                     {
@@ -179,7 +179,7 @@ namespace WebApiRRHH.Services.Auth
                 }
 
                 // Verificar si el usuario esta activo
-                if (!user.IsActive)
+                if (!empleado.IsActive)
                 {
                     return new AuthResponseDto
                     {
@@ -189,7 +189,7 @@ namespace WebApiRRHH.Services.Auth
                 }
 
                 // Verificar confirmación de email si está habilitada
-                if (_securitySettings.RequireEmailConfirmation && !user.EmailConfirmed)
+                if (_securitySettings.RequireEmailConfirmation && !empleado.EmailConfirmed)
                 {
                     return new AuthResponseDto
                     {
@@ -199,17 +199,17 @@ namespace WebApiRRHH.Services.Auth
                 }
 
                 // Login exitoso - resetear intentos fallidos
-                user.FailedLoginAttempts = 0;
-                user.LockoutEnd = null;
-                user.LastLoginDate = DateTime.UtcNow;
+                empleado.FailedLoginAttempts = 0;
+                empleado.LockoutEnd = null;
+                empleado.LastLoginDate = DateTime.UtcNow;
                 await _context.SaveChangesAsync();
 
-                await _auditService.LogAsync("Login", "User", user.Id, null,
-                    $"Login exitoso: {user.Email}", ipAddress, userAgent, user.Id);
+                await _auditService.LogAsync("Login", "Empleado", empleado.Id, null,
+                    $"Login exitoso: {empleado.Email}", ipAddress, empleadoAgent, empleado.Id);
 
-                _logger.LogInformation("Login exitoso: {Email}", user.Email);
+                _logger.LogInformation("Login exitoso: {Email}", empleado.Email);
 
-                return await GenerateAuthResponseAsync(user, ipAddress, userAgent);
+                return await GenerateAuthResponseAsync(empleado, ipAddress, empleadoAgent);
             }
             catch (Exception ex)
             {
@@ -222,7 +222,7 @@ namespace WebApiRRHH.Services.Auth
             }
         }
 
-        public async Task<AuthResponseDto> RefreshTokenAsync(RefreshTokenDto refreshTokenDto, string ipAddress, string userAgent)
+        public async Task<AuthResponseDto> RefreshTokenAsync(RefreshTokenDto refreshTokenDto, string ipAddress, string empleadoAgent)
         {
             try
             {
@@ -237,8 +237,8 @@ namespace WebApiRRHH.Services.Auth
                     };
                 }
 
-                var userIdClaim = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                if (!int.TryParse(userIdClaim, out int userId))
+                var empleadoIdClaim = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (!int.TryParse(empleadoIdClaim, out int empleadoId))
                 {
                     return new AuthResponseDto
                     {
@@ -249,15 +249,15 @@ namespace WebApiRRHH.Services.Auth
 
                 // Buscar el refresh token
                 var storedRefreshToken = await _context.RefreshTokens!
-                    .Include(rt => rt.User)
+                    .Include(rt => rt.Empleado)
                     .FirstOrDefaultAsync(rt =>
                         rt.Token == refreshTokenDto.RefreshToken &&
-                        rt.UserId == userId);
+                        rt.EmpleadoId == empleadoId);
 
                 if (storedRefreshToken == null || !storedRefreshToken.IsActive)
                 {
                     await _auditService.LogAsync("RefreshTokenFailed", "RefreshToken", null, null,
-                        $"Intento de usar refresh token inválido", ipAddress, userAgent, userId, "Warning");
+                        $"Intento de usar refresh token inválido", ipAddress, empleadoAgent, empleadoId, "Warning");
 
                     return new AuthResponseDto
                     {
@@ -271,10 +271,10 @@ namespace WebApiRRHH.Services.Auth
                 await _context.SaveChangesAsync();
 
                 // Generar nuevos tokens, actualizara el refresh token
-                var response = await GenerateAuthResponseAsync(storedRefreshToken.User, ipAddress, userAgent);
+                var response = await GenerateAuthResponseAsync(storedRefreshToken.Empleado, ipAddress, empleadoAgent);
 
-                await _auditService.LogAsync("RefreshToken", "User", userId, null,
-                    $"Tokens renovados exitosamente", ipAddress, userAgent, userId);
+                await _auditService.LogAsync("RefreshToken", "Empleado", empleadoId, null,
+                    $"Tokens renovados exitosamente", ipAddress, empleadoAgent, empleadoId);
 
                 return response;
             }
@@ -303,9 +303,9 @@ namespace WebApiRRHH.Services.Auth
                 await _context.SaveChangesAsync();
 
                 await _auditService.LogAsync("RevokeToken", "RefreshToken", token.Id, null,
-                    $"Refresh token revocado", ipAddress, null, token.UserId);
+                    $"Refresh token revocado", ipAddress, null, token.EmpleadoId);
 
-                _logger.LogInformation("Refresh token revocado para usuario: {UserId}", token.UserId);
+                _logger.LogInformation("Refresh token revocado para usuario: {EmpleadoId}", token.EmpleadoId);
                 return true;
             }
             catch (Exception ex)
@@ -315,33 +315,33 @@ namespace WebApiRRHH.Services.Auth
             }
         }
 
-        public async Task<bool> ChangePasswordAsync(int userId, ChangePasswordDto changePasswordDto)
+        public async Task<bool> ChangePasswordAsync(int empleadoId, ChangePasswordDto changePasswordDto)
         {
             try
             {
-                var user = await _context.Users!.FindAsync(userId);
-                if (user == null)
+                var empleado = await _context.Empleados!.FindAsync(empleadoId);
+                if (empleado == null)
                     return false;
 
                 // Verificar contraseña actual
-                if (!_passwordHasher.VerifyPassword(changePasswordDto.CurrentPassword, user.PasswordHash))
+                if (!_passwordHasher.VerifyPassword(changePasswordDto.CurrentPassword, empleado.PasswordHash))
                 {
-                    await _auditService.LogAsync("ChangePasswordFailed", "User", userId, null,
-                        "Contraseña actual incorrecta", null, null, userId, "Warning");
+                    await _auditService.LogAsync("ChangePasswordFailed", "Empleado", empleadoId, null,
+                        "Contraseña actual incorrecta", null, null, empleadoId, "Warning");
                     return false;
                 }
 
                 // Actualizar contraseña
-                user.PasswordHash = _passwordHasher.HashPassword(changePasswordDto.NewPassword);
-                user.PasswordChangedDate = DateTime.UtcNow;
-                user.UpdatedAt = DateTime.UtcNow;
+                empleado.PasswordHash = _passwordHasher.HashPassword(changePasswordDto.NewPassword);
+                empleado.PasswordChangedDate = DateTime.UtcNow;
+                empleado.UpdatedAt = DateTime.UtcNow;
 
                 await _context.SaveChangesAsync();
 
-                await _auditService.LogAsync("ChangePassword", "User", userId, null,
-                    "Contraseña cambiada exitosamente", null, null, userId);
+                await _auditService.LogAsync("ChangePassword", "Empleado", empleadoId, null,
+                    "Contraseña cambiada exitosamente", null, null, empleadoId);
 
-                _logger.LogInformation("Contraseña cambiada para usuario: {UserId}", userId);
+                _logger.LogInformation("Contraseña cambiada para usuario: {EmpleadoId}", empleadoId);
                 return true;
             }
             catch (Exception ex)
@@ -355,10 +355,10 @@ namespace WebApiRRHH.Services.Auth
         {
             try
             {
-                var user = await _context.Users!
+                var empleado = await _context.Empleados!
                     .FirstOrDefaultAsync(u => u.Email.ToLower() == forgotPasswordDto.Email.ToLower());
 
-                if (user == null)
+                if (empleado == null)
                 {
                     // No revelar si el email existe o no esto por tema de seguridad
                     return true;
@@ -366,16 +366,16 @@ namespace WebApiRRHH.Services.Auth
 
                 // Generar token de reset
                 var resetToken = _passwordHasher.GenerateSecureToken();
-                user.ResetPasswordToken = resetToken;
-                user.ResetPasswordTokenExpiry = DateTime.UtcNow.AddHours(1); // Token válido por 1 hora
+                empleado.ResetPasswordToken = resetToken;
+                empleado.ResetPasswordTokenExpiry = DateTime.UtcNow.AddHours(1); // Token válido por 1 hora
 
                 await _context.SaveChangesAsync();
 
-                await _auditService.LogAsync("ForgotPassword", "User", user.Id, null,
-                    "Token de reset de contraseña generado", null, null, user.Id);
+                await _auditService.LogAsync("ForgotPassword", "Empleado", empleado.Id, null,
+                    "Token de reset de contraseña generado", null, null, empleado.Id);
 
                 //Enviar email con el token
-                _logger.LogInformation("Token de reset generado para: {Email}", user.Email);
+                _logger.LogInformation("Token de reset generado para: {Email}", empleado.Email);
 
                 return true;
             }
@@ -390,33 +390,33 @@ namespace WebApiRRHH.Services.Auth
         {
             try
             {
-                var user = await _context.Users!
+                var empleado = await _context.Empleados!
                     .FirstOrDefaultAsync(u =>
                         u.Email.ToLower() == resetPasswordDto.Email.ToLower() &&
                         u.ResetPasswordToken == resetPasswordDto.Token &&
                         u.ResetPasswordTokenExpiry > DateTime.UtcNow);
 
-                if (user == null)
+                if (empleado == null)
                 {
-                    await _auditService.LogAsync("ResetPasswordFailed", "User", null, null,
+                    await _auditService.LogAsync("ResetPasswordFailed", "Empleado", null, null,
                         $"Token de reset inválido o expirado para: {resetPasswordDto.Email}",
                         null, null, null, "Warning");
                     return false;
                 }
 
                 // Actualizar contraseña
-                user.PasswordHash = _passwordHasher.HashPassword(resetPasswordDto.NewPassword);
-                user.PasswordChangedDate = DateTime.UtcNow;
-                user.ResetPasswordToken = null;
-                user.ResetPasswordTokenExpiry = null;
-                user.UpdatedAt = DateTime.UtcNow;
+                empleado.PasswordHash = _passwordHasher.HashPassword(resetPasswordDto.NewPassword);
+                empleado.PasswordChangedDate = DateTime.UtcNow;
+                empleado.ResetPasswordToken = null;
+                empleado.ResetPasswordTokenExpiry = null;
+                empleado.UpdatedAt = DateTime.UtcNow;
 
                 await _context.SaveChangesAsync();
 
-                await _auditService.LogAsync("ResetPassword", "User", user.Id, null,
-                    "Contraseña reseteada exitosamente", null, null, user.Id);
+                await _auditService.LogAsync("ResetPassword", "Empleado", empleado.Id, null,
+                    "Contraseña reseteada exitosamente", null, null, empleado.Id);
 
-                _logger.LogInformation("Contraseña reseteada para: {Email}", user.Email);
+                _logger.LogInformation("Contraseña reseteada para: {Email}", empleado.Email);
                 return true;
             }
             catch (Exception ex)
@@ -426,23 +426,23 @@ namespace WebApiRRHH.Services.Auth
             }
         }
 
-        public async Task<bool> ConfirmEmailAsync(int userId, string token)
+        public async Task<bool> ConfirmEmailAsync(int empleadoId, string token)
         {
             try
             {
-                var user = await _context.Users!.FindAsync(userId);
-                if (user == null || user.EmailConfirmed)
+                var empleado = await _context.Empleados!.FindAsync(empleadoId);
+                if (empleado == null || empleado.EmailConfirmed)
                     return false;
 
                 // Validar token de confirmación
 
-                user.EmailConfirmed = true;
-                user.UpdatedAt = DateTime.UtcNow;
+                empleado.EmailConfirmed = true;
+                empleado.UpdatedAt = DateTime.UtcNow;
 
                 await _context.SaveChangesAsync();
 
-                await _auditService.LogAsync("ConfirmEmail", "User", userId, null,
-                    "Email confirmado", null, null, userId);
+                await _auditService.LogAsync("ConfirmEmail", "Empleado", empleadoId, null,
+                    "Email confirmado", null, null, empleadoId);
 
                 return true;
             }
@@ -454,21 +454,21 @@ namespace WebApiRRHH.Services.Auth
         }
 
         // Método privado para generar la respuesta de autenticación
-        private async Task<AuthResponseDto> GenerateAuthResponseAsync(User user, string ipAddress, string userAgent)
+        private async Task<AuthResponseDto> GenerateAuthResponseAsync(Empleado empleado, string ipAddress, string empleadoAgent)
         {
-            var accessToken = _jwtService.GenerateAccessToken(user);
+            var accessToken = _jwtService.GenerateAccessToken(empleado);
             var refreshToken = _jwtService.GenerateRefreshToken();
 
             // Guardar refresh token en la BD
             var refreshTokenEntity = new RefreshToken
             {
-                UserId = user.Id,
+                EmpleadoId = empleado.Id,
                 Token = refreshToken,
                 JwtId = GetJwtId(accessToken),
                 CreatedAt = DateTime.UtcNow,
                 ExpiresAt = DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenExpirationDays),
                 IpAddress = ipAddress,
-                UserAgent = userAgent
+                EmpleadoAgent = empleadoAgent
             };
 
             _context.RefreshTokens!.Add(refreshTokenEntity);
@@ -481,13 +481,13 @@ namespace WebApiRRHH.Services.Auth
                 AccessToken = accessToken,
                 RefreshToken = refreshToken,
                 TokenExpiration = DateTime.UtcNow.AddMinutes(_jwtSettings.AccessTokenExpirationMinutes),
-                User = new UserInfoDto
+                Empleado = new EmpleadoInfoDto
                 {
-                    Id = user.Id,
-                    Email = user.Email,
-                    Name = user.Name,
-                    Role = user.Role,
-                    EmailConfirmed = user.EmailConfirmed
+                    Id = empleado.Id,
+                    Email = empleado.Email,
+                    Name = empleado.Name,
+                    Role = empleado.Role,
+                    EmailConfirmed = empleado.EmailConfirmed
                 }
             };
         }

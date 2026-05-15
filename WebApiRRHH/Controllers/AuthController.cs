@@ -21,7 +21,7 @@ namespace WebApiRRHH.Controllers
         }
 
         /// <summary>
-        /// Registrar un nuevo usuario
+        /// Registrar un nuevo empleado
         /// </summary>
         [HttpPost("register")]
         [AllowAnonymous]
@@ -35,9 +35,9 @@ namespace WebApiRRHH.Controllers
                     return BadRequest(ModelState);
 
                 var ipAddress = GetIpAddress();
-                var userAgent = GetUserAgent();
+                var empleadoAgent = GetEmpleadoAgent();
 
-                var result = await _authService.RegisterAsync(registerDto, ipAddress, userAgent);
+                var result = await _authService.RegisterAsync(registerDto, ipAddress, empleadoAgent);
 
                 if (!result.Success)
                     return BadRequest(result);
@@ -46,7 +46,7 @@ namespace WebApiRRHH.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error en registro de usuario");
+                _logger.LogError(ex, "Error en registro de empleado");
                 return StatusCode(500, new AuthResponseDto
                 {
                     Success = false,
@@ -70,14 +70,14 @@ namespace WebApiRRHH.Controllers
                     return BadRequest(ModelState);
 
                 var ipAddress = GetIpAddress();
-                var userAgent = GetUserAgent();
+                var empleadoAgent = GetEmpleadoAgent();
 
-                var result = await _authService.LoginAsync(loginDto, ipAddress, userAgent);
+                var result = await _authService.LoginAsync(loginDto, ipAddress, empleadoAgent);
 
                 if (!result.Success)
                     return Unauthorized(result);
 
-                // Configurar cookie con el refresh token, mas seguro para evitar que roben de datos del usuario.
+                // Configurar cookie con el refresh token, mas seguro para evitar que roben de datos del empleado.
                 SetRefreshTokenCookie(result.RefreshToken!);
 
                 return Ok(result);
@@ -120,9 +120,9 @@ namespace WebApiRRHH.Controllers
                 }
 
                 var ipAddress = GetIpAddress();
-                var userAgent = GetUserAgent();
+                var empleadoAgent = GetEmpleadoAgent();
 
-                var result = await _authService.RefreshTokenAsync(refreshTokenDto, ipAddress, userAgent);
+                var result = await _authService.RefreshTokenAsync(refreshTokenDto, ipAddress, empleadoAgent);
 
                 if (!result.Success)
                     return Unauthorized(result);
@@ -179,7 +179,7 @@ namespace WebApiRRHH.Controllers
         }
 
         /// <summary>
-        /// Cambiar contraseña solo cuando el usuario esta autenticado
+        /// Cambiar contraseña solo cuando el empleado esta autenticado
         /// </summary>
         [HttpPost("change-password")]
         [Authorize]
@@ -192,11 +192,11 @@ namespace WebApiRRHH.Controllers
                 if (!ModelState.IsValid)
                     return BadRequest(ModelState);
 
-                var userId = GetCurrentUserId();
-                if (!userId.HasValue)
+                var empleadoId = GetCurrentEmpleadoId();
+                if (!empleadoId.HasValue)
                     return Unauthorized(new { message = "Usuario no autenticado" });
 
-                var result = await _authService.ChangePasswordAsync(userId.Value, changePasswordDto);
+                var result = await _authService.ChangePasswordAsync(empleadoId.Value, changePasswordDto);
 
                 if (!result)
                 {
@@ -227,7 +227,7 @@ namespace WebApiRRHH.Controllers
 
                 await _authService.ForgotPasswordAsync(forgotPasswordDto);
 
-                // Siempre retornamos un success para no revelar si el email existe a cualquier usuario
+                // Siempre retornamos un success para no revelar si el email existe a cualquier empleado
                 return Ok(new
                 {
                     message = "Si el email existe, recibirá un enlace para resetear su contraseña"
@@ -271,47 +271,47 @@ namespace WebApiRRHH.Controllers
         }
 
         /// <summary>
-        /// Obtener información del usuario actual
+        /// Obtener información del empleado actual
         /// </summary>
         [HttpGet("me")]
         [Authorize]
-        [ProducesResponseType(typeof(UserInfoDto), StatusCodes.Status200OK)]
-        public IActionResult GetCurrentUser()
+        [ProducesResponseType(typeof(EmpleadoInfoDto), StatusCodes.Status200OK)]
+        public IActionResult GetCurrentEmpleado()
         {
             try
             {
-                var userId = GetCurrentUserId();
+                var empleadoId = GetCurrentEmpleadoId();
                 var email = User.FindFirst(ClaimTypes.Email)?.Value;
                 var name = User.FindFirst(ClaimTypes.Name)?.Value;
                 var role = User.FindFirst(ClaimTypes.Role)?.Value;
                 var department = User.FindFirst("department")?.Value;
                 var position = User.FindFirst("position")?.Value;
 
-                if (!userId.HasValue)
+                if (!empleadoId.HasValue)
                     return Unauthorized();
 
-                var userInfo = new UserInfoDto
+                var EmpleadoInfo = new EmpleadoInfoDto
                 {
-                    Id = userId.Value,
+                    Id = empleadoId.Value,
                     Email = email ?? "",
                     Name = name ?? "",
                     Role = role ?? ""
                 };
 
-                return Ok(userInfo);
+                return Ok(EmpleadoInfo);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al obtener usuario actual");
+                _logger.LogError(ex, "Error al obtener empleado actual");
                 return StatusCode(500, new { message = "Error interno del servidor" });
             }
         }
 
         // Métodos auxiliares privados
-        private int? GetCurrentUserId()
+        private int? GetCurrentEmpleadoId()
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            return int.TryParse(userIdClaim, out int userId) ? userId : null;
+            var empleadoIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            return int.TryParse(empleadoIdClaim, out int empleadoId) ? empleadoId : null;
         }
 
         private string GetIpAddress()
@@ -327,9 +327,9 @@ namespace WebApiRRHH.Controllers
             return ipAddress;
         }
 
-        private string GetUserAgent()
+        private string GetEmpleadoAgent()
         {
-            return HttpContext.Request.Headers["User-Agent"].FirstOrDefault() ?? "Unknown";
+            return HttpContext.Request.Headers["Empleado-Agent"].FirstOrDefault() ?? "Unknown";
         }
 
         private void SetRefreshTokenCookie(string refreshToken)

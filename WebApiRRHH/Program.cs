@@ -97,10 +97,10 @@ builder.Services.AddAuthorization(options =>
 });
 
 // Repositorios
-builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IEmpleadoRepository, EmpleadoRepository>();
 
 // Servicios
-builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IEmpleadoService, EmpleadoService>();
 
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IAuditService, AuditService>();

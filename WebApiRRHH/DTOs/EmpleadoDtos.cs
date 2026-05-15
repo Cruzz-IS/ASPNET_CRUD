@@ -2,7 +2,7 @@
 
 namespace WebApiRRHH.DTOs
 {
-    public class CreateUserDto
+    public class CreateEmpleadoDto
     {
         [Required(ErrorMessage = "El nombre es requerido")]
         [StringLength(80, MinimumLength = 2)]
@@ -17,7 +17,7 @@ namespace WebApiRRHH.DTOs
     }
 
     // DTO para actualizar un usuario
-    public class UpdateUserDto
+    public class UpdateEmpleadoDto
     {
         [StringLength(80, MinimumLength = 2)]
         public string? Name { get; set; }
@@ -32,7 +32,7 @@ namespace WebApiRRHH.DTOs
     }
 
     // DTO de respuesta (lo que devolvemos al cliente Frontend)
-    public class UserResponseDto
+    public class EmpleadoResponseDto
     {
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;

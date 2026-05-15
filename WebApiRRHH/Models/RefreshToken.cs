@@ -11,7 +11,7 @@ namespace WebApiRRHH.Models
         public int Id { get; set; }
 
         [Required]
-        public int UserId { get; set; }
+        public int EmpleadoId { get; set; }
 
         [Required]
         [StringLength(500)]
@@ -35,10 +35,10 @@ namespace WebApiRRHH.Models
         public string? IpAddress { get; set; }
 
         [StringLength(500)]
-        public string? UserAgent { get; set; }
+        public string? EmpleadoAgent { get; set; }
 
-        // Relación con User
-        [ForeignKey("UserId")]
+        // Relación con Empleado
+        [ForeignKey("EmpleadoId")]
         public virtual Empleado Empleado { get; set; } = null!;
 
         [NotMapped]

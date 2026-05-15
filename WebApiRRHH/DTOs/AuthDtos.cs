@@ -2,7 +2,7 @@
 
 namespace WebApiRRHH.DTOs.Auth
 {
-    // DTO para registro de usuario
+    // DTO para registro de empleado
     public class RegisterDto
     {
         [Required(ErrorMessage = "El nombre es requerido")]
@@ -54,11 +54,11 @@ namespace WebApiRRHH.DTOs.Auth
         public string? AccessToken { get; set; }
         public string? RefreshToken { get; set; }
         public DateTime? TokenExpiration { get; set; }
-        public UserInfoDto? User { get; set; }
+        public EmpleadoInfoDto? Empleado { get; set; }
     }
 
-    // DTO con información del usuario
-    public class UserInfoDto
+    // DTO con información del empleado
+    public class EmpleadoInfoDto
     {
         public int Id { get; set; }
         public string Email { get; set; } = string.Empty;

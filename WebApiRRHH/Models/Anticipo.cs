@@ -7,10 +7,14 @@ namespace WebApiRRHH.Models
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int Id { get; set; }
+        public int IdAnticipo { get; set; }
         public DateTime Fecha { get; set; }
         public string? Descripcion { get; set; }
-        public Double Monto { get; set; } = Double.MinValue;
+        public decimal? Monto { get; set; } 
         public string? Estado { get; set; }
+        public int Empleado_idEmpleado { get; set; }
+        public virtual Empleado Empleado { get; set; } = null!;
+        public int Planilla_idPlanilla { get; set; }
+        public virtual Planilla Planilla { get; set; } = null!;
     }
 }

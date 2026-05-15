@@ -6,7 +6,7 @@ namespace WebApiRRHH.Context
 {
     public class AppDBContext : DbContext
     {
-        public DbSet<User> Users { get; set; } = null!;
+        public DbSet<Empleado> Empleados { get; set; } = null!;
         public DbSet<RefreshToken> RefreshTokens { get; set; } = null!;
         public DbSet<Audit> Audits { get; set; } = null!;
 
@@ -16,21 +16,21 @@ namespace WebApiRRHH.Context
         {
             base.OnModelCreating(modelBuilder);
 
-            // Configuración de la entidad User
-            modelBuilder.Entity<User>(entity =>
+            // Configuración de la entidad Empleado
+            modelBuilder.Entity<Empleado>(entity =>
             {
                 // Índice único para el email
                 entity.HasIndex(e => e.Email)
                     .IsUnique()
-                    .HasDatabaseName("IX_Users_Email");
+                    .HasDatabaseName("IX_Empleados_Email");
 
                 // Índice para filtros de usuarios activos
                 entity.HasIndex(e => e.IsActive)
-                    .HasDatabaseName("IX_Users_IsActive");
+                    .HasDatabaseName("IX_Empleados_IsActive");
 
                 // Índice para los roles de un usuario
                 entity.HasIndex(e => e.Role)
-                    .HasDatabaseName("IX_Users_Role");
+                    .HasDatabaseName("IX_Empleados_Role");
 
                 // Configuración de propiedades
                 entity.Property(e => e.Email)
@@ -53,10 +53,10 @@ namespace WebApiRRHH.Context
                     .HasMaxLength(50)
                     .HasDefaultValue("Employee");
 
-                //Relación con RefreshTokens trabla users y tabla refreshTokens
+                //Relación con RefreshTokens trabla empleados y tabla refreshTokens
                 entity.HasMany(u => u.RefreshTokens)
-                    .WithOne(rt => rt.User)
-                    .HasForeignKey(rt => rt.UserId)
+                    .WithOne(rt => rt.Empleado)
+                    .HasForeignKey(rt => rt.EmpleadoId)
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
@@ -66,8 +66,8 @@ namespace WebApiRRHH.Context
                 entity.HasIndex(e => e.Token)
                     .HasDatabaseName("IX_RefreshTokens_Token");
 
-                entity.HasIndex(e => e.UserId)
-                    .HasDatabaseName("IX_RefreshTokens_UserId");
+                entity.HasIndex(e => e.EmpleadoId)
+                    .HasDatabaseName("IX_RefreshTokens_EmpleadoId");
 
                 entity.HasIndex(e => e.ExpiresAt)
                     .HasDatabaseName("IX_RefreshTokens_ExpiresAt");
@@ -79,8 +79,8 @@ namespace WebApiRRHH.Context
             //Configuración de AuditLog
             modelBuilder.Entity<Audit>(entity =>
             {
-                entity.HasIndex(e => e.UserId)
-                    .HasDatabaseName("IX_AuditLogs_UserId");
+                entity.HasIndex(e => e.EmpleadoId)
+                    .HasDatabaseName("IX_AuditLogs_EmpleadoId");
 
                 entity.HasIndex(e => e.Timestamp)
                     .HasDatabaseName("IX_AuditLogs_Timestamp");
@@ -100,10 +100,10 @@ namespace WebApiRRHH.Context
         {
             // Password: Admin@123 (hasheado con BCrypt para no guardar la contraseña rela en la BD)
             var adminPasswordHash = BCrypt.Net.BCrypt.HashPassword("Admin@123");
-            var userPasswordHash = BCrypt.Net.BCrypt.HashPassword("User@123");
+            var empleadoPasswordHash = BCrypt.Net.BCrypt.HashPassword("Empleado@123");
 
-            modelBuilder.Entity<User>().HasData(
-                new User
+            modelBuilder.Entity<Empleado>().HasData(
+                new Empleado
                 {
                     Id = 1,
                     Name = "Admin",
@@ -116,12 +116,12 @@ namespace WebApiRRHH.Context
                     CreatedAt = DateTime.UtcNow,
                     PasswordChangedDate = DateTime.UtcNow
                 },
-                new User
+                new Empleado
                 {
                     Id = 2,
                     Name = "Juan",
                     Email = "juan.perez@yahoo.com",
-                    PasswordHash = userPasswordHash,
+                    PasswordHash = empleadoPasswordHash,
                     PhoneNumber = "+504 9999-8888",
                     Role = "Empleado",
                     IsActive = true,
@@ -129,12 +129,12 @@ namespace WebApiRRHH.Context
                     CreatedAt = DateTime.UtcNow,
                     PasswordChangedDate = DateTime.UtcNow
                 },
-                new User
+                new Empleado
                 {
                     Id = 3,
                     Name = "María",
                     Email = "maria.gonzalez@gmail.com",
-                    PasswordHash = userPasswordHash,
+                    PasswordHash = empleadoPasswordHash,
                     PhoneNumber = "+504 9999-7777",
                     Role = "Cliente",
                     IsActive = true,
@@ -145,7 +145,7 @@ namespace WebApiRRHH.Context
             );
         }
 
-        //public DbSet<Models.User> Users { get; set; }
+        //public DbSet<Models.Empleado> Empleados { get; set; }
 
         //public AppDBContext(DbContextOptions<AppDBContext> options) : base(options) { }
     }

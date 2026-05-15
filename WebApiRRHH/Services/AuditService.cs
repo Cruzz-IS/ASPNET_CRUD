@@ -13,8 +13,8 @@ namespace WebApiRRHH.Services.Auth
             string? oldValues,
             string? newValues,
             string? ipAddress,
-            string? userAgent,
-            int? userId,
+            string? empleadoAgent,
+            int? empleadoId,
             string severity = "Info");
     }
 
@@ -36,8 +36,8 @@ namespace WebApiRRHH.Services.Auth
             string? oldValues,
             string? newValues,
             string? ipAddress,
-            string? userAgent,
-            int? userId,
+            string? empleadoAgent,
+            int? empleadoId,
             string severity = "Info")
         {
             try
@@ -50,8 +50,8 @@ namespace WebApiRRHH.Services.Auth
                     OldValues = oldValues,
                     NewValues = newValues,
                     IpAddress = ipAddress,
-                    UserAgent = userAgent,
-                    UserId = userId,
+                    EmpleadoAgent = empleadoAgent,
+                    EmpleadoId = empleadoId,
                     Severity = severity,
                     Timestamp = DateTime.UtcNow
                 };

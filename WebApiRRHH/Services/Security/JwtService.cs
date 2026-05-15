@@ -10,7 +10,7 @@ namespace WebApiRRHH.Services.Security
 {
     public interface IJwtService
     {
-        string GenerateAccessToken(User user);
+        string GenerateAccessToken(Empleado empleado);
         string GenerateRefreshToken();
         ClaimsPrincipal? GetPrincipalFromExpiredToken(string token);
         string? ValidateToken(string token);
@@ -30,17 +30,17 @@ namespace WebApiRRHH.Services.Security
         /// <summary>
         /// Genera un Access Token JWT con claims del usuario
         /// </summary>
-        public string GenerateAccessToken(User user)
+        public string GenerateAccessToken(Empleado empleado)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_jwtSettings.Secret);
 
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Email, user.Email),
-                new Claim(ClaimTypes.Name, user.Name),
-                new Claim(ClaimTypes.Role, user.Role),
+                new Claim(ClaimTypes.NameIdentifier, empleado.Id.ToString()),
+                new Claim(ClaimTypes.Email, empleado.Email),
+                new Claim(ClaimTypes.Name, empleado.Name),
+                new Claim(ClaimTypes.Role, empleado.Role),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
 
@@ -143,9 +143,9 @@ namespace WebApiRRHH.Services.Security
                 var principal = tokenHandler.ValidateToken(token, validationParameters, out SecurityToken validatedToken);
 
                 var jwtToken = (JwtSecurityToken)validatedToken;
-                var userId = jwtToken.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value;
+                var empleadoId = jwtToken.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value;
 
-                return userId;
+                return empleadoId;
             }
             catch (Exception ex)
             {

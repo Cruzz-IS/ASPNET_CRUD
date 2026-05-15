@@ -16,14 +16,14 @@ namespace WebApiRRHH.Models
         public int Id { get; set; }
 
         [Required]
-        public int? UserId { get; set; }
+        public int? EmpleadoId { get; set; }
 
-        // Relación con User
-        [ForeignKey("UserId")]
+        // Relación con Empleado
+        [ForeignKey("EmpleadoId")]
         public virtual Empleado Empleado { get; set; } = null!;
 
         [StringLength(200)]
-        public string? UserEmail { get; set; }
+        public string? EmpleadoEmail { get; set; }
 
         [Required]
         [StringLength(50)]
@@ -41,7 +41,7 @@ namespace WebApiRRHH.Models
         [StringLength(50)]
         public string? IpAddress { get; set; }
 
-        public string? UserAgent { get; set; }
+        public string? EmpleadoAgent { get; set; }
 
         [Required]
         public DateTime Timestamp { get; set; } = DateTime.UtcNow;
