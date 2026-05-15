@@ -1,7 +1,7 @@
 ﻿using WebApiRRHH.Context;
 using WebApiRRHH.Models;
 
-namespace WebApiRRHH.Services.Auth
+namespace WebApiRRHH.Services
 {
     public interface IAuditService
     {

@@ -113,6 +113,15 @@ namespace WebApiRRHH.Context
             modelBuilder.Entity<DeduccionEmpleado>()
                 .HasKey(de => new { de.IdDeduccion, de.IdEmpleado });
 
+            modelBuilder.Entity<Anticipo>()
+                .Property(a => a.Monto)
+                .HasPrecision(18, 2); // 18 dígitos en total, 2 decimales
+
+            modelBuilder.Entity<Deduccion>()
+                .Property(d => d.valor)
+                .HasPrecision(18, 2);
+
+
             // --- CONFIGURACIÓN DE ENTIDADES ---
 
             // Empleado y Relación Recursiva (Jefe)

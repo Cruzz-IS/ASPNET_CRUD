@@ -8,6 +8,6 @@ namespace WebApiRRHH.Models
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int IdTipoDeduccion { get; set; }
-        public string? descripcion { get; set; } = null!;
+        public string? Descripcion { get; set; } = null!;
     }
 }

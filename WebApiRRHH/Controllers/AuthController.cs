@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WebApiRRHH.DTOs.Auth;
-using WebApiRRHH.Services.Auth;
+using WebApiRRHH.Services;
 using System.Security.Claims;
 
 namespace WebApiRRHH.Controllers

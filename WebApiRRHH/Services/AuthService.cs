@@ -8,7 +8,7 @@ using WebApiRRHH.DTOs.Auth;
 using WebApiRRHH.Models;
 using WebApiRRHH.Services.Security;
 
-namespace WebApiRRHH.Services.Auth
+namespace WebApiRRHH.Services
 {
     public interface IAuthService
     {

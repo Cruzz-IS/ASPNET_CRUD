@@ -10,7 +10,6 @@ using WebApiRRHH.Context;
 using WebApiRRHH.Repositories;
 using WebApiRRHH.Repositories.Interfaces;
 using WebApiRRHH.Services;
-using WebApiRRHH.Services.Auth;
 using WebApiRRHH.Services.Security;
 
 var builder = WebApplication.CreateBuilder(args);
