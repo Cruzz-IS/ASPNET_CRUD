@@ -16,7 +16,7 @@ namespace WebApiRRHH.Models
 
         public int idTipoDeduccion { get; set; }
 
-        public virtual TipoDeduccion TipoDeduccion { get; set; }
+        public virtual TipoDeduccion? TipoDeduccion { get; set; }
 
     }
 }

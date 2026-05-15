@@ -7,6 +7,17 @@ namespace WebApiRRHH.Context
     public class AppDBContext : DbContext
     {
         public DbSet<Empleado> Empleados { get; set; } = null!;
+        public DbSet<Cargo> Cargos { get; set; } = null!;
+        public DbSet<Planilla> Planillas { get; set; } = null!;
+        public DbSet<Bono> Bonos { get; set; } = null!;
+        public DbSet<Anticipo> Anticipos { get; set; } = null!;
+        public DbSet<TipoDeduccion> TipoDeducciones { get; set; } = null!;
+        public DbSet<Deduccion> Deducciones { get; set; } = null!;
+
+        // Entidades Intermedias (Muchos a Muchos)
+        public DbSet<CargoEmpleado> CargosEmpleados { get; set; } = null!;
+        public DbSet<EmpleadoBono> EmpleadoBonos { get; set; } = null!;
+        public DbSet<DeduccionEmpleado> DeduccionesEmpleados { get; set; } = null!;
         public DbSet<RefreshToken> RefreshTokens { get; set; } = null!;
         public DbSet<Audit> Audits { get; set; } = null!;
 
@@ -91,6 +102,35 @@ namespace WebApiRRHH.Context
                 entity.Property(e => e.Timestamp)
                     .HasDefaultValueSql("GETUTCDATE()");
             });
+
+
+            modelBuilder.Entity<CargoEmpleado>()
+                .HasKey(ce => new { ce.IdCargo, ce.IdEmpleado });
+
+            modelBuilder.Entity<EmpleadoBono>()
+                .HasKey(eb => new { eb.Empleado_idEmpleado, eb.Bono_idBono });
+
+            modelBuilder.Entity<DeduccionEmpleado>()
+                .HasKey(de => new { de.IdDeduccion, de.IdEmpleado });
+
+            // --- CONFIGURACIÓN DE ENTIDADES ---
+
+            // Empleado y Relación Recursiva (Jefe)
+            modelBuilder.Entity<Empleado>(entity =>
+            {
+                //entity.HasIndex(e => e.NumeroIdentidad).IsUnique();
+
+                //entity.HasOne(e => e.Jefe)
+                //    .WithMany(j => j.Subordinados)
+                //    .HasForeignKey(e => e.idEmpleadoJefe)
+                //    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.Property(e => e.CreatedAt).HasDefaultValueSql("GETUTCDATE()");
+            });
+
+            // Configuración de precisión para decimales
+            modelBuilder.Entity<Cargo>().Property(c => c.SueldoBase).HasPrecision(18, 2);
+            //modelBuilder.Entity<Empleado>().Property(e => e.IncrementoSueldo).HasPrecision(5, 2);
 
             // Datos de prueba esto para cargar datos cuando se hace una migracion
             SeedData(modelBuilder);
