@@ -87,13 +87,10 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-builder.Services.AddAuthorization(options =>
-{
-    // Políticas de autorización basadas en roles
-    options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
-    options.AddPolicy("ManagerOrAdmin", policy => policy.RequireRole("Admin", "Manager"));
-    options.AddPolicy("AllUsers", policy => policy.RequireRole("Admin", "Manager", "Employee"));
-});
+builder.Services.AddAuthorizationBuilder()
+    .AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"))
+    .AddPolicy("ManagerOrAdmin", policy => policy.RequireRole("Admin", "Manager"))
+    .AddPolicy("AllUsers", policy => policy.RequireRole("Admin", "Manager", "Employee"));
 
 // Repositorios
 builder.Services.AddScoped<IEmpleadoRepository, EmpleadoRepository>();

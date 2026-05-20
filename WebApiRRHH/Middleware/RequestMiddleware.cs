@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using Microsoft.EntityFrameworkCore;
+using System.Diagnostics;
 using System.Text;
 
 namespace WebApiRRHH.Middleware
@@ -12,78 +13,45 @@ namespace WebApiRRHH.Middleware
         private readonly RequestDelegate _next;
         private readonly ILogger<RequestMiddleware> _logger;
 
-        public RequestMiddleware(RequestDelegate next, ILogger<RequestMiddleware> logger)
-        {
-            _next = next;
-            _logger = logger;
-        }
+        public RequestMiddleware(RequestDelegate next, ILogger<RequestMiddleware> logger) => (_next, _logger) = (next, logger);
 
         public async Task InvokeAsync(HttpContext context)
         {
             var stopwatch = Stopwatch.StartNew();
-
-            // Obtener información de la request
             var request = context.Request;
             var method = request.Method;
             var path = request.Path;
-            var queryString = request.QueryString;
-            var ipAddress = GetIpAddress(context);
-            var empleadoAgent = request.Headers["Empleado-Agent"].ToString();
-            var empleadoId = context.User?.FindFirst("sub")?.Value ?? "Anonymous";
+            var ipAddress = context.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
+            var userId = context.User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? "Anonymous";
 
-            // Log de request entrante de parte del cliente
-            _logger.LogInformation(
-                "HTTP {Method} {Path}{QueryString} - Empleado: {EmpleadoId} - IP: {IpAddress}",
-                method, path, queryString, empleadoId, ipAddress);
-
-            // Capturar la respuesta 
-            var originalBodyStream = context.Response.Body;
-
-            using var responseBody = new MemoryStream();
-            context.Response.Body = responseBody;
+            _logger.LogInformation("HTTP {Method} {Path} - User: {UserId} - IP: {IpAddress}",
+                method, path, userId, ipAddress);
 
             try
             {
-                // Ejecutar el siguiente middleware
                 await _next(context);
-
                 stopwatch.Stop();
 
-                // Log de la respuesta que se le muestra al cliente
-                var statusCode = context.Response.StatusCode;
-                var level = statusCode >= 500 ? LogLevel.Error :
-                           statusCode >= 400 ? LogLevel.Warning :
-                           LogLevel.Information;
-
-                _logger.Log(level,
-                    "HTTP {Method} {Path} responded {StatusCode} in {ElapsedMs}ms - Empleado: {EmpleadoId}",
-                    method, path, statusCode, stopwatch.ElapsedMilliseconds, empleadoId);
-
-                await responseBody.CopyToAsync(originalBodyStream);
+                _logger.LogInformation("HTTP {Method} {Path} responded {StatusCode} in {ElapsedMs}ms",
+                    method, path, context.Response.StatusCode, stopwatch.ElapsedMilliseconds);
             }
             catch (Exception ex)
             {
                 stopwatch.Stop();
-                _logger.LogError(ex,
-                    "HTTP {Method} {Path} failed after {ElapsedMs}ms - Empleado: {EmpleadoId} - Error: {Error}",
-                    method, path, stopwatch.ElapsedMilliseconds, empleadoId, ex.Message);
+                _logger.LogError(ex, "HTTP {Method} {Path} failed", method, path);
                 throw;
-            }
-            finally
-            {
-                context.Response.Body = originalBodyStream;
             }
         }
 
-        private string GetIpAddress(HttpContext context)
-        {
-            var ipAddress = context.Request.Headers["X-Forwarded-For"].FirstOrDefault();
-            if (string.IsNullOrEmpty(ipAddress))
-            {
-                ipAddress = context.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
-            }
-            return ipAddress;
-        }
+        //private string GetIpAddress(HttpContext context)
+        //{
+        //    var ipAddress = context.Request.Headers["X-Forwarded-For"].FirstOrDefault();
+        //    if (string.IsNullOrEmpty(ipAddress))
+        //    {
+        //        ipAddress = context.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
+        //    }
+        //    return ipAddress;
+        //}
     }
 
     // Extension method
