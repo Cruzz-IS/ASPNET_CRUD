@@ -1,4 +1,5 @@
-﻿using WebApiRRHH.Context;
+﻿using WebApiRRHH.Configuration;
+using WebApiRRHH.Context;
 using WebApiRRHH.Models;
 
 namespace WebApiRRHH.Services
@@ -23,11 +24,7 @@ namespace WebApiRRHH.Services
         private readonly AppDBContext _context;
         private readonly ILogger<AuditService> _logger;
 
-        public AuditService(AppDBContext context, ILogger<AuditService> logger)
-        {
-            _context = context;
-            _logger = logger;
-        }
+        public AuditService(AppDBContext context, ILogger<AuditService> logger) => (_context, _logger) = (context, logger);
 
         public async Task LogAsync(
             string action,

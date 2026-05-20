@@ -21,11 +21,7 @@ namespace WebApiRRHH.Services.Security
         private readonly JwtSettings _jwtSettings;
         private readonly ILogger<JwtService> _logger;
 
-        public JwtService(JwtSettings jwtSettings, ILogger<JwtService> logger)
-        {
-            _jwtSettings = jwtSettings;
-            _logger = logger;
-        }
+        public JwtService(JwtSettings jwtSettings, ILogger<JwtService> logger) => (_jwtSettings, _logger) = (jwtSettings, logger);
 
         /// <summary>
         /// Genera un Access Token JWT con claims del usuario
@@ -37,11 +33,11 @@ namespace WebApiRRHH.Services.Security
 
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.NameIdentifier, empleado.Id.ToString()),
-                new Claim(ClaimTypes.Email, empleado.Email),
-                new Claim(ClaimTypes.Name, empleado.Name),
-                new Claim(ClaimTypes.Role, empleado.Role),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+                new(ClaimTypes.NameIdentifier, empleado.Id.ToString()),
+                new(ClaimTypes.Email, empleado.Email),
+                new(ClaimTypes.Name, empleado.Name),
+                new(ClaimTypes.Role, empleado.Role),
+                new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
 
             var tokenDescriptor = new SecurityTokenDescriptor

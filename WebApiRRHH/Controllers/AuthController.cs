@@ -1,8 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+using WebApiRRHH.Configuration;
 using WebApiRRHH.DTOs.Auth;
 using WebApiRRHH.Services;
-using System.Security.Claims;
 
 namespace WebApiRRHH.Controllers
 {
@@ -14,12 +15,7 @@ namespace WebApiRRHH.Controllers
         private readonly IAuthService _authService;
         private readonly ILogger<AuthController> _logger;
 
-        public AuthController(IAuthService authService, ILogger<AuthController> logger)
-        {
-            _authService = authService;
-            _logger = logger;
-        }
-
+        public AuthController(IAuthService authService, ILogger<AuthController> logger) => (_authService, _logger) = (authService, logger);
         /// <summary>
         /// Registrar un nuevo empleado
         /// </summary>

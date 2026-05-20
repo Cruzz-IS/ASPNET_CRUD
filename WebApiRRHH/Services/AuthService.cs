@@ -40,22 +40,15 @@ namespace WebApiRRHH.Services
             SecuritySettings securitySettings,
             ILogger<AuthService> logger,
             IAuditService auditService)
-        {
-            _context = context;
-            _passwordHasher = passwordHasher;
-            _jwtService = jwtService;
-            _jwtSettings = jwtSettings;
-            _securitySettings = securitySettings;
-            _logger = logger;
-            _auditService = auditService;
-        }
+            => (_context, _passwordHasher, _jwtService, _jwtSettings, _securitySettings, _logger, _auditService)
+            = (context, passwordHasher, jwtService, jwtSettings, securitySettings, logger, auditService);
 
         public async Task<AuthResponseDto> RegisterAsync(RegisterDto registerDto, string ipAddress, string empleadoAgent)
         {
             try
             {
                 // Verificar si el email ya existe, si es el caso no dejara registrar al cliente
-                if (await _context.Empleados!.AnyAsync(u => u.Email.ToLower() == registerDto.Email.ToLower()))
+                if (await _context.Empleados!.AnyAsync(u => string.Equals(u.Email, registerDto.Email, StringComparison.OrdinalIgnoreCase)))
                 {
                     return new AuthResponseDto
                     {
@@ -118,7 +111,7 @@ namespace WebApiRRHH.Services
             try
             {
                 var empleado = await _context.Empleados!
-                    .FirstOrDefaultAsync(u => u.Email.ToLower() == loginDto.Email.ToLower());
+                    .FirstOrDefaultAsync(u => string.Equals(u.Email, loginDto.Email, StringComparison.OrdinalIgnoreCase));
 
                 if (empleado == null)
                 {
@@ -356,7 +349,7 @@ namespace WebApiRRHH.Services
             try
             {
                 var empleado = await _context.Empleados!
-                    .FirstOrDefaultAsync(u => u.Email.ToLower() == forgotPasswordDto.Email.ToLower());
+                    .FirstOrDefaultAsync(u => string.Equals(u.Email, forgotPasswordDto.Email, StringComparison.OrdinalIgnoreCase));
 
                 if (empleado == null)
                 {
@@ -392,7 +385,7 @@ namespace WebApiRRHH.Services
             {
                 var empleado = await _context.Empleados!
                     .FirstOrDefaultAsync(u =>
-                        u.Email.ToLower() == resetPasswordDto.Email.ToLower() &&
+                        string.Equals(u.Email, resetPasswordDto.Email, StringComparison.OrdinalIgnoreCase) &&
                         u.ResetPasswordToken == resetPasswordDto.Token &&
                         u.ResetPasswordTokenExpiry > DateTime.UtcNow);
 
@@ -492,7 +485,7 @@ namespace WebApiRRHH.Services
             };
         }
 
-        private string GetJwtId(string token)
+        private static string GetJwtId(string token)
         {
             var handler = new JwtSecurityTokenHandler();
             var jwtToken = handler.ReadJwtToken(token);
