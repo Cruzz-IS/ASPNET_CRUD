@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using NuGet.Protocol.Core.Types;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using WebApiRRHH.Configuration;
@@ -110,8 +111,9 @@ namespace WebApiRRHH.Services
         {
             try
             {
+                var emailLower = loginDto.Email.ToLower();
                 var empleado = await _context.Empleados!
-                    .FirstOrDefaultAsync(u => string.Equals(u.Email, loginDto.Email, StringComparison.OrdinalIgnoreCase));
+                    .FirstOrDefaultAsync(e => e.Email.ToLower() == emailLower);
 
                 if (empleado == null)
                 {
